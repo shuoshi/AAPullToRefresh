@@ -5,7 +5,7 @@
 
 @implementation UIScrollView (AAPullToRefresh)
 
-- (AAPullToRefresh *)addPullToRefreshPosition:(AAPullToRefreshPosition)position actionHandler:(void (^)(AAPullToRefresh *v))handler
+- (AAPullToRefresh *)addPullToRefreshPosition:(AAPullToRefreshPosition)position ActionHandler:(void (^)(AAPullToRefresh *v))handler
 {
     AAPullToRefresh *view = [[AAPullToRefresh alloc] initWithImage:[UIImage imageNamed:@"centerIcon"]
                                                           position:position];
@@ -89,7 +89,6 @@
 /*-----------------------------------------------------------------*/
 @interface AAPullToRefresh()
 
-@property (nonatomic, assign) BOOL isUserAction;
 @property (nonatomic, assign) BOOL isObserving;
 @property (nonatomic, assign) AAPullToRefreshState state;
 @property (nonatomic, assign, readonly) BOOL isSidePosition;
@@ -120,7 +119,6 @@
     self.borderColor = [UIColor colorWithRed:203/255.0 green:32/255.0 blue:39/255.0 alpha:1];
     self.borderWidth = 2.0f;
     self.threshold = 60.0f;
-    self.isUserAction = NO;
     self.contentMode = UIViewContentModeRedraw;
     self.state = AAPullToRefreshStateNormal;
     if (self.isSidePosition)
@@ -189,7 +187,7 @@
     UIEdgeInsets currentInsets = self.scrollView.contentInset;
     if (self.position == AAPullToRefreshPositionTop) {
         CGFloat offset = MAX(self.scrollView.contentOffset.y * -1, 0);
-        currentInsets.top = MIN(offset, self.originalInsetTop + self.bounds.size.height + 20.0f);
+        currentInsets.top = MIN(offset, self.originalInsetTop + self.bounds.size.height + 90.0f);
     } else {
         //CGFloat overBottomOffsetY = self.scrollView.contentOffset.y - self.scrollView.contentSize.height + self.scrollView.frame.size.height;
         //currentInsets.bottom = MIN(overBottomOffsetY, self.originalInsetBottom + self.bounds.size.height + 40.0);
@@ -201,8 +199,8 @@
 - (void)resetScrollViewContentInset:(actionHandler)handler
 {
     UIEdgeInsets currentInsets = self.scrollView.contentInset;
-    currentInsets.top = self.originalInsetTop;
-    currentInsets.bottom = self.originalInsetBottom;
+    currentInsets.top = self.originalInsetTop + 70;
+    currentInsets.bottom = self.originalInsetBottom + 49;
     [self setScrollViewContentInset:currentInsets handler:handler];
 }
 
@@ -327,9 +325,9 @@
     CGFloat centerY;
     switch (self.position) {
         case AAPullToRefreshPositionTop:
-            self.progress = ((yOffset + self.originalInsetTop) / -self.threshold);
+            self.progress = ((yOffset + self.originalInsetTop+70) / -self.threshold);
             centerX = self.scrollView.center.x + xOffset;
-            centerY = (yOffset + self.originalInsetTop) / 2.0f;
+            centerY = (yOffset + self.originalInsetTop+70) / 2.0f;
             break;
         case AAPullToRefreshPositionBottom:
             self.progress = overBottomOffsetY / self.threshold;
@@ -358,7 +356,7 @@
     self.center = CGPointMake(centerX, centerY);
     switch (self.state) {
         case AAPullToRefreshStateNormal: //detect action
-            if (self.isUserAction && !self.scrollView.dragging && !self.scrollView.isZooming && self.prevProgress > 0.99f) {
+            if (!self.scrollView.dragging && !self.scrollView.isZooming && self.prevProgress > 0.99f) {
                 [self actionTriggeredState];
             }
             break;
@@ -369,7 +367,6 @@
             break;
     }
     
-    self.isUserAction = (self.scrollView.dragging) ? YES : NO;
 }
 
 - (void)actionTriggeredState
